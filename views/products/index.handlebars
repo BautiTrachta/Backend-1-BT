@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Productos</title>
+</head>
+<body>
+  <h1>Lista de Productos</h1>
+  <ul>
+    {{#each productos}}
+      <li>{{this.name}} - ${{this.price}}</li>
+    {{/each}}
+  </ul>
+
+  <h2>Agregar Producto</h2>
+  <form action="/addProduct" method="POST">
+    <input type="text" name="name" placeholder="Nombre del producto" required>
+    <input type="number" name="price" placeholder="Precio" required>
+    <button type="submit">Agregar</button>
+  </form>
+</body>
+</html>

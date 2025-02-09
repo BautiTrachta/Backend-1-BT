@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos en Tiempo Real</title>
+</head>
+<body>
+  <h1>Productos en Tiempo Real</h1>
+  <ul id="productos-list">
+    {{#each productos}}
+      <li id="producto-{{@index}}">
+        {{this.name}} - ${{this.price}}
+        <button onclick="eliminarProducto({{@index}})">Eliminar</button>
+      </li>
+    {{/each}}
+  </ul>
+
+  <h2>Agregar Producto</h2>
+  <form id="add-product-form">
+    <input type="text" id="name" placeholder="Nombre del producto" required>
+    <input type="number" id="price" placeholder="Precio" required>
+    <button type="submit">Agregar</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    
+    socket.on('newProduct', function(producto) {
+      const productosList = document.getElementById('productos-list');
+      const newProduct = document.createElement('li');
+      newProduct.textContent = `${producto.name} - $${producto.price}`;
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Eliminar';
+      deleteButton.onclick = function() {
+        eliminarProducto(producto.index);
+      };
+      newProduct.appendChild(deleteButton);
+      productosList.appendChild(newProduct);
+    });
+
+    
+    socket.on('deleteProduct', function(index) {
+      const productElement = document.getElementById(`producto-${index}`);
+      if (productElement) {
+        productElement.remove();
+      }
+    });
+
+   
+    document.getElementById('add-product-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const name = document.getElementById('name').value;
+      const price = document.getElementById('price').value;
+
+      fetch('/addProduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `name=${name}&price=${price}`
+      })
+      .then(response => response.redirect('/realtimeproducts'));
+    });
+
+    
+    function eliminarProducto(index) {
+      fetch('/deleteProduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `index=${index}`
+      })
+      .then(response => response.redirect('/realtimeproducts'));
+    }
+  </script>
+</body>
+</html>
